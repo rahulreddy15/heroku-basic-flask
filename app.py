@@ -1,20 +1,19 @@
-from flask import Flask, request
-import random
-from datetime import datetime
+from flask import Flask, send_from_directory, request
 from werkzeug.utils import secure_filename
+from flask_restful import Api, Resource, reqparse
+from flask_cors import CORS, cross_origin
+import random
 import os
-app = Flask(__name__)
 
-@app.route('/')
-def homepage():
-    the_time = datetime.now().strftime("%A, %d %b %Y %l:%M %p")
+app = Flask(__name__, static_url_path='', static_folder='frontend/build')
+app.config['UPLOAD_FOLDER'] = os.getcwd()
+CORS(app) #comment this on deployment
+api = Api(app)
 
-    return """
-    <h1>Hello heroku</h1>
-    <p>It is currently {time}.</p>
+@app.route("/", defaults={'path':''})
+def serve(path):
+    return send_from_directory(app.static_folder,'index.html')
 
-    <img src="http://loremflickr.com/600/400" />
-    """.format(time=the_time)
 
 def process_questions(PATH, n_q, time):
     with open(PATH) as f:
@@ -100,6 +99,7 @@ def process_questions(PATH, n_q, time):
 
 
 @app.route('/upload', methods=['POST'])
+@cross_origin()
 def fileUpload():
     try:
         target = os.path.join(app.config['UPLOAD_FOLDER'], 'question_files')
@@ -121,9 +121,3 @@ def fileUpload():
         response = {"status_code": "400", "message": "Error Processing File"}
     print(file)
     return {"status": "200", "message": output}
-
-
-
-if __name__ == '__main__':
-    app.run(debug=True, use_reloader=True)
-
