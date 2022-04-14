@@ -1,21 +1,21 @@
 from flask import Flask, send_from_directory, request
+from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
 from flask_restful import Api, Resource, reqparse
-from flask_cors import CORS, cross_origin
 import random
 import os
 import time
 
 app = Flask(__name__, static_url_path='', static_folder='frontend/build')
 app.config['UPLOAD_FOLDER'] = os.getcwd()
-CORS(app) #comment this on deployment
+CORS(app, resources=['/*']) #comment this on deployment
 api = Api(app)
 
 @app.route("/", defaults={'path':''})
 def serve(path):
-    return "<p>Hello World</p>"
+    return send_from_directory(app.static_folder, 'index.html')
 
-def process_questions(PATH, n_q, time):
+def process_questions(PATH, n_q, time, name):
     with open(PATH) as f:
         lines_1 = f.readlines()
     lines_2 = [x for x in lines_1 if not x.startswith(('*', '\n'))]
@@ -95,34 +95,37 @@ def process_questions(PATH, n_q, time):
         ANSWERS.append(ans)
         OPTIONS.append(opts)
 
-    return [OUT, n_q, time]
+    return [OUT, n_q, time, name]
 
 
 @app.route('/upload', methods=['POST'])
 @cross_origin()
 def fileUpload():
+    print("Hello")
     try:
         target = os.path.join(app.config['UPLOAD_FOLDER'], 'question_files')
         if not os.path.isdir(target):
             os.mkdir(target)
+        
         file = request.files['file']
         name = request.form['name']
         n_q = request.form['n_q']
-        time = request.form['time']
+        times = request.form['time']
         print("Hello")
         filename = secure_filename(file.filename)
         destination = "/".join([target, filename])
         file.save(destination)
         log_file_name = "log_"+name+".txt"
-        quiz_log_path = "/".join([destination, log_file_name])
-        # with open(quiz_log_path,"a+") as f:
-        #     f.write("New File Uploaded and Quiz Requested at "+time.time()+"\n")
+        quiz_log_path = "/".join([target, log_file_name])
+        print(quiz_log_path)
+        with open(quiz_log_path,"a+") as f:
+            f.write("New File Uploaded and Quiz Requested at "+str(time.time())+"\n")
     except Exception as e:
         response = {"status_code": "400", "message": e}
         return response
     
     try:
-        output = process_questions(destination, int(n_q), time)
+        output = process_questions(destination, int(n_q), times, name)
     except Exception as e:
         response = {"status_code": "400", "message": "Error Processing File"}
     print(file)
@@ -134,10 +137,11 @@ def fileUpload():
 def getLogFile():
     try:
         name = request.form['name']
-        target_file = 'question_files'+ '/' + name + '/' + 'quiz_log.txt'
-        if os.path.isfile(target_file):
+        target_file = 'question_files'+ '/' + "log_"+name+".txt"
+        target_path = os.path.join(app.config['UPLOAD_FOLDER'], target_file)
+        if os.path.isfile(target_path):
             with open(target_file,"a") as f:
-                f.write("Log File accessed at "+time.time()+"\n")
+                f.write("Log File accessed at "+str(time.time())+"\n")
 
             with open(target_file) as f:
                 lines = f.readlines()
@@ -147,5 +151,28 @@ def getLogFile():
             response = {"status_code": "400", "message": "Log does not exist for this name"}
         return response
     except Exception as e:
+        print(e)
         response = {"status_code": "400", "message": "Error Processing Log File"}
+        return response
+
+@app.route('/updateLogFile', methods=['POST'])
+@cross_origin()
+def updateLogFile():
+    print("In the shit")
+    try:
+        name = request.form['name']
+        results = request.form['result']
+        target_file = 'question_files'+ '/' + "log_"+name+".txt"
+        target_path = os.path.join(app.config['UPLOAD_FOLDER'], target_file)
+        if os.path.isfile(target_path):
+            with open(target_file,"a+") as f:
+                f.write(results)
+
+            return {"status": "200", "message": "Results Updated"}
+        else:
+            response = {"status_code": "400", "message": "Log does not exist for this name"}
+        return response
+    except Exception as e:
+        print(e)
+        response = {"status_code": "400", "message": "Error Updating Log File"}
         return response
