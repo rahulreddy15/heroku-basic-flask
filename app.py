@@ -14,8 +14,7 @@ api = Api(app)
 
 @app.route("/", defaults={'path':''})
 def serve(path):
-    return send_from_directory(app.static_folder,'index.html')
-
+    return "<p>Hello World</p>"
 
 def process_questions(PATH, n_q, time):
     with open(PATH) as f:
@@ -107,11 +106,13 @@ def fileUpload():
         name = request.form['name']
         target_folder = 'question_files'+ '/' + name
         target = os.path.join(app.config['UPLOAD_FOLDER'], target_folder)
+        print(target)
         if not os.path.isdir(target):
             os.mkdir(target)
         file = request.files['file']
         n_q = request.form['n_q']
         time = request.form['time']
+        print("Hello")
         filename = secure_filename(file.filename)
         destination = "/".join([target, filename])
         file.save(destination)
@@ -130,7 +131,7 @@ def fileUpload():
     return {"status": "200", "message": output}
 
 
-@app.route('/getlogfile', methods=['POST'])
+@app.route('/getLogFile', methods=['POST'])
 @cross_origin()
 def getLogFile():
     try:
@@ -150,6 +151,3 @@ def getLogFile():
     except Exception as e:
         response = {"status_code": "400", "message": "Error Processing Log File"}
         return response
-
-
-
