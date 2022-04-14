@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, request, send_file
+from flask import Flask, send_from_directory, request
 from flask_cors import CORS, cross_origin
 from werkzeug.utils import secure_filename
 from flask_restful import Api, Resource, reqparse
@@ -143,11 +143,10 @@ def getLogFile():
             with open(target_file,"a") as f:
                 f.write("Log File accessed at "+str(time.ctime(time.time()))+"\n")
 
-            # with open(target_file) as f:
-            #     lines = f.readlines()
-            # data = [line.rstrip() for line in lines]
-            #return {"status": "200", "message": data}
-            return send_file(target_path, as_attachment=True)
+            with open(target_file) as f:
+                lines = f.readlines()
+            data = [line.rstrip() for line in lines]
+            return {"status": "200", "message": data}
         else:
             response = {"status": "400", "message": "Log does not exist for this name"}
         return response
