@@ -102,23 +102,19 @@ def process_questions(PATH, n_q, time):
 @cross_origin()
 def fileUpload():
     try:
-        # name = request.form['name']
-        target_fake = os.path.join(app.config['UPLOAD_FOLDER'], 'question_files')
-        if not os.path.isdir(target_fake):
-            os.mkdir(target)
-        name = "Hello Kitty"
-        target = os.path.join(target_fake, name)
-        print(target)
+        target = os.path.join(app.config['UPLOAD_FOLDER'], 'question_files')
         if not os.path.isdir(target):
             os.mkdir(target)
         file = request.files['file']
+        name = request.form['name']
         n_q = request.form['n_q']
         time = request.form['time']
         print("Hello")
         filename = secure_filename(file.filename)
         destination = "/".join([target, filename])
         file.save(destination)
-        quiz_log_path = "/".join([target, "quiz_log.txt"])
+        log_file_name = "log_"+name+".txt"
+        quiz_log_path = "/".join([destination, log_file_name])
         with open(quiz_log_path,"a+") as f:
             f.write("New File Uploaded and Quiz Requested at "+time.time()+"\n")
     except Exception as e:
