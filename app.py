@@ -1,4 +1,3 @@
-from ast import ExceptHandler
 from flask import Flask, send_from_directory, request
 from werkzeug.utils import secure_filename
 from flask_restful import Api, Resource, reqparse
@@ -11,6 +10,11 @@ app = Flask(__name__, static_url_path='', static_folder='frontend/build')
 app.config['UPLOAD_FOLDER'] = os.getcwd()
 CORS(app) #comment this on deployment
 api = Api(app)
+try:
+    os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'question_files'))
+except OSError:
+    pass
+
 
 @app.route("/", defaults={'path':''})
 def serve(path):
