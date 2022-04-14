@@ -121,7 +121,7 @@ def fileUpload():
         with open(quiz_log_path,"a+") as f:
             f.write("New File Uploaded and Quiz Requested at "+now.strftime("%Y-%m-%d %H:%M:%S")+"\n")
     except Exception as e:
-        response = {"status_code": "400", "message": "Error Uploading File"}
+        response = {"status_code": "400", "message": e}
         return response
     
     try:
