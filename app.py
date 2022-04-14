@@ -10,11 +10,6 @@ app = Flask(__name__, static_url_path='', static_folder='frontend/build')
 app.config['UPLOAD_FOLDER'] = os.getcwd()
 CORS(app) #comment this on deployment
 api = Api(app)
-try:
-    os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'question_files'))
-except OSError:
-    pass
-
 
 @app.route("/", defaults={'path':''})
 def serve(path):
@@ -109,6 +104,8 @@ def fileUpload():
     try:
         name = request.form['name']
         target_fake = os.path.join(app.config['UPLOAD_FOLDER'], 'question_files')
+        if not os.path.isdir(target_fake):
+            os.mkdir(target)
         target = os.path.join(target_fake, name)
         print(target)
         if not os.path.isdir(target):
