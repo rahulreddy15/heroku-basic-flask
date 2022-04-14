@@ -102,10 +102,11 @@ def process_questions(PATH, n_q, time):
 @cross_origin()
 def fileUpload():
     try:
-        name = request.form['name']
+        # name = request.form['name']
         target_fake = os.path.join(app.config['UPLOAD_FOLDER'], 'question_files')
         if not os.path.isdir(target_fake):
             os.mkdir(target)
+        name = "Hello Kitty"
         target = os.path.join(target_fake, name)
         print(target)
         if not os.path.isdir(target):
