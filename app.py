@@ -115,8 +115,8 @@ def fileUpload():
         file.save(destination)
         log_file_name = "log_"+name+".txt"
         quiz_log_path = "/".join([destination, log_file_name])
-        with open(quiz_log_path,"a+") as f:
-            f.write("New File Uploaded and Quiz Requested at "+time.time()+"\n")
+        # with open(quiz_log_path,"a+") as f:
+        #     f.write("New File Uploaded and Quiz Requested at "+time.time()+"\n")
     except Exception as e:
         response = {"status_code": "400", "message": e}
         return response
