@@ -119,15 +119,15 @@ def fileUpload():
         quiz_log_path = "/".join([target, log_file_name])
         print(quiz_log_path)
         with open(quiz_log_path,"a+") as f:
-            f.write("New File Uploaded and Quiz Requested at "+str(time.time())+"\n")
+            f.write("New File Uploaded and Quiz Requested at "+str(time.ctime(time.time()))+"\n")
     except Exception as e:
-        response = {"status_code": "400", "message": e}
+        response = {"status": "400", "message": "Please provide all the info and check the file format"}
         return response
     
     try:
         output = process_questions(destination, int(n_q), times, name)
     except Exception as e:
-        response = {"status_code": "400", "message": "Error Processing File"}
+        response = {"status": "400", "message": "Error Processing File"}
     print(file)
     return {"status": "200", "message": output}
 
@@ -141,18 +141,18 @@ def getLogFile():
         target_path = os.path.join(app.config['UPLOAD_FOLDER'], target_file)
         if os.path.isfile(target_path):
             with open(target_file,"a") as f:
-                f.write("Log File accessed at "+str(time.time())+"\n")
+                f.write("Log File accessed at "+str(time.ctime(time.time()))+"\n")
 
             with open(target_file) as f:
                 lines = f.readlines()
             data = [line.rstrip() for line in lines]
             return {"status": "200", "message": data}
         else:
-            response = {"status_code": "400", "message": "Log does not exist for this name"}
+            response = {"status": "400", "message": "Log does not exist for this name"}
         return response
     except Exception as e:
         print(e)
-        response = {"status_code": "400", "message": "Error Processing Log File"}
+        response = {"status": "400", "message": "Error Processing Log File"}
         return response
 
 @app.route('/updateLogFile', methods=['POST'])
@@ -170,9 +170,9 @@ def updateLogFile():
 
             return {"status": "200", "message": "Results Updated"}
         else:
-            response = {"status_code": "400", "message": "Log does not exist for this name"}
+            response = {"status": "400", "message": "Log does not exist for this name"}
         return response
     except Exception as e:
         print(e)
-        response = {"status_code": "400", "message": "Error Updating Log File"}
+        response = {"status": "400", "message": "Error Updating Log File"}
         return response
