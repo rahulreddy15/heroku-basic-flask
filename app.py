@@ -1,9 +1,12 @@
+from ast import ExceptHandler
+from time import strftime
 from flask import Flask, send_from_directory, request
 from werkzeug.utils import secure_filename
 from flask_restful import Api, Resource, reqparse
 from flask_cors import CORS, cross_origin
 import random
 import os
+import datetime
 
 app = Flask(__name__, static_url_path='', static_folder='frontend/build')
 app.config['UPLOAD_FOLDER'] = os.getcwd()
@@ -102,18 +105,24 @@ def process_questions(PATH, n_q, time):
 @cross_origin()
 def fileUpload():
     try:
-        target = os.path.join(app.config['UPLOAD_FOLDER'], 'question_files')
+        name = request.form['name']
+        target_folder = 'question_files'+ '/' + name
+        target = os.path.join(app.config['UPLOAD_FOLDER'], target_folder)
         if not os.path.isdir(target):
             os.mkdir(target)
         file = request.files['file']
-        name = request.form['name']
         n_q = request.form['n_q']
         time = request.form['time']
         filename = secure_filename(file.filename)
         destination = "/".join([target, filename])
         file.save(destination)
+        quiz_log_path = "/".join([target, "quiz_log.txt"])
+        now = datetime.now()
+        with open(quiz_log_path,"a+") as f:
+            f.write("New File Uploaded and Quiz Requested at "+now.strftime("%Y-%m-%d %H:%M:%S")+"\n")
     except Exception as e:
         response = {"status_code": "400", "message": "Error Uploading File"}
+        return response
     
     try:
         output = process_questions(destination, int(n_q), time)
@@ -121,3 +130,34 @@ def fileUpload():
         response = {"status_code": "400", "message": "Error Processing File"}
     print(file)
     return {"status": "200", "message": output}
+
+@app.route('/addresulttolog', methods=['POST'])
+@cross_origin()
+def addResultToLog():
+    pass
+
+
+@app.route('/getlogfile', methods=['POST'])
+@cross_origin()
+def getLogFile():
+    try:
+        name = request.form['name']
+        target_file = 'question_files'+ '/' + name + '/' + 'quiz_log.txt'
+        now = datetime.now()
+        if os.path.isfile(target_file):
+            with open(target_file,"a") as f:
+                f.write("Log File accessed at "+now.strftime("%Y-%m-%d %H:%M:%S")+"\n")
+
+            with open(target_file) as f:
+                lines = f.readlines()
+            data = [line.rstrip() for line in lines]
+            return {"status": "200", "message": data}
+        else:
+            response = {"status_code": "400", "message": "Log does not exist for this name"}
+        return response
+    except Exception as e:
+        response = {"status_code": "400", "message": "Error Processing Log File"}
+        return response
+
+
+
