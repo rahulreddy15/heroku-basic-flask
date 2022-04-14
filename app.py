@@ -131,11 +131,6 @@ def fileUpload():
     print(file)
     return {"status": "200", "message": output}
 
-@app.route('/addresulttolog', methods=['POST'])
-@cross_origin()
-def addResultToLog():
-    pass
-
 
 @app.route('/getlogfile', methods=['POST'])
 @cross_origin()
