@@ -145,8 +145,7 @@ def getLogFile():
 
             with open(target_file) as f:
                 lines = f.readlines()
-            data = [line.rstrip() for line in lines]
-            return {"status": "200", "message": data}
+            return {"status": "200", "message": lines}
         else:
             response = {"status": "400", "message": "Log does not exist for this name"}
         return response
