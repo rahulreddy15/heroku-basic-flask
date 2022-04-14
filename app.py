@@ -1,12 +1,11 @@
 from ast import ExceptHandler
-from time import strftime
 from flask import Flask, send_from_directory, request
 from werkzeug.utils import secure_filename
 from flask_restful import Api, Resource, reqparse
 from flask_cors import CORS, cross_origin
 import random
 import os
-import datetime
+import time
 
 app = Flask(__name__, static_url_path='', static_folder='frontend/build')
 app.config['UPLOAD_FOLDER'] = os.getcwd()
@@ -117,9 +116,8 @@ def fileUpload():
         destination = "/".join([target, filename])
         file.save(destination)
         quiz_log_path = "/".join([target, "quiz_log.txt"])
-        now = datetime.now()
         with open(quiz_log_path,"a+") as f:
-            f.write("New File Uploaded and Quiz Requested at "+now.strftime("%Y-%m-%d %H:%M:%S")+"\n")
+            f.write("New File Uploaded and Quiz Requested at "+time.time()+"\n")
     except Exception as e:
         response = {"status_code": "400", "message": e}
         return response
@@ -138,10 +136,9 @@ def getLogFile():
     try:
         name = request.form['name']
         target_file = 'question_files'+ '/' + name + '/' + 'quiz_log.txt'
-        now = datetime.now()
         if os.path.isfile(target_file):
             with open(target_file,"a") as f:
-                f.write("Log File accessed at "+now.strftime("%Y-%m-%d %H:%M:%S")+"\n")
+                f.write("Log File accessed at "+time.time()+"\n")
 
             with open(target_file) as f:
                 lines = f.readlines()
