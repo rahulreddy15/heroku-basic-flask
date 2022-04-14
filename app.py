@@ -104,8 +104,8 @@ def process_questions(PATH, n_q, time):
 def fileUpload():
     try:
         name = request.form['name']
-        target_folder = 'question_files'+ '/' + name
-        target = os.path.join(app.config['UPLOAD_FOLDER'], target_folder)
+        target_fake = os.path.join(app.config['UPLOAD_FOLDER'], 'question_files')
+        target = os.path.join(target_fake, name)
         print(target)
         if not os.path.isdir(target):
             os.mkdir(target)
